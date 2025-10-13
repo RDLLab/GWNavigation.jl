@@ -13,7 +13,7 @@ Pkg.add("https://github.com/RDLLab/GWNavigation.jl.git")
 
 ## Example
 
-This example uses the implimented visualization simulator, but can be used with any POMDPTools.jl simulator. Visualizer is implemented as an package extantion that depends on the `GLMakie` package.
+This example uses the implimented visualization simulator, but can be used with any POMDPTools.jl simulator. Visualizer is implemented as a package extantion that depends on the `GLMakie` package.
 
 ```julia
 using GWNavigation
