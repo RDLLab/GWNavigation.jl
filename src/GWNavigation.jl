@@ -12,7 +12,7 @@ const GWState = SVector{2, Int}  # (x, y) coordinates   Type alias for state rep
 
 const GWObservation = SVector{2, Int}  # (x, y) coordinates  Type alias for observation representation
 
-struct GWNavigationPOMDP <: POMDP{GWState, Int, GWObservation}
+struct GWNavigationPOMDP <: POMDP{GWState, Symbol, GWObservation}
     grid_size::Tuple{Int, Int}
     free_states::Dict{GWState, Int} # Mapping states to their indices
     goal_states::Dict{GWState, Int}
