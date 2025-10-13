@@ -19,7 +19,7 @@ function GWAStarPolicy(pomdp::POMDP; rng::AbstractRNG=Random.GLOBAL_RNG, uniform
 end
 
 # POMDP action selection using A*
-function POMDPs.action(p::GWAStarPolicy, b::Union{ParticleCollection{GWState}, WeightedParticleBelief{GWState}})
+function POMDPs.action(p::GWAStarPolicy, b)
     if rand(p.rng) < p.uniform_weight
         return rand(p.rng, POMDPs.actions(p.pomdp))
     else

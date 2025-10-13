@@ -4,7 +4,6 @@ module GWNavigationSimExt
 
 using POMDPs
 using POMDPTools
-using ParticleFilters
 using GLMakie
 
 # Import your main package to access its types and functions
@@ -33,9 +32,12 @@ function POMDPs.simulate(sim::GWNavigationSimulator, pomdp::GWNavigationPOMDP, a
             # Draw the initial belief
             positions = Point2f[]
             colours = Tuple{String,Float64}[]
-            for (belief_pos, p) in ParticleFilters.probdict(step.b)
-                push!(positions, belief_pos)
-                push!(colours, ("#FF0000", p * 0.8 + 0.2))  # Scale alpha for visibility
+            for belief_s in support(step.b)
+                p = pdf(step.b, belief_s)
+                if p > 0.0 # Only plot particles with non-zero probability
+                    push!(positions, Point2f(belief_s[1], belief_s[2]))
+                    push!(colours, ("#FF0000", p * 0.8 + 0.2))  # Scale alpha for visibility
+                end
             end
             belief_positions[] = positions
             belief_colours[] = colours
@@ -60,10 +62,10 @@ function POMDPs.simulate(sim::GWNavigationSimulator, pomdp::GWNavigationPOMDP, a
         # Update belief visualization
         positions = Point2f[]
         colours = Tuple{String,Float64}[]
-        for (belief_pos, p) in ParticleFilters.probdict(step.bp)
+        for belief_s in support(step.bp)
+            p = pdf(step.bp, belief_s)
             if p > 0.0 # Only plot particles with non-zero probability
-                push!(positions, belief_pos)
-                # push!(colours, RGBA(1.0, 0.0, 0.0, p * 0.8 + 0.2))  # Scale alpha for visibility
+                push!(positions, Point2f(belief_s[1], belief_s[2]))
                 push!(colours, ("#FF0000", p * 0.8 + 0.2))  # Scale alpha for visibility
             end
         end

@@ -1,7 +1,6 @@
 module GWNavigation
 
 using DataStructures
-using ParticleFilters
 using POMDPs
 using POMDPTools
 using Random

@@ -12,6 +12,10 @@ function GWNavigationSimulator(; max_steps::Int=nothing, rng::AbstractRNG=Random
     return GWNavigationSimulator(StepSimulator(rng, max_steps, spec), pause_each_step)
 end
 
+function POMDPs.simulate(sim::GWNavigationSimulator, pomdp, args...)
+    error("To use GWNavigationSimulator, you must have GLMakie loaded. Please run `using GLMakie`.")
+end
+
 # Stub function definition
 function plot_astar_policy(pomdp, policy)
     error("To use `plot_astar_policy`, you must have GLMakie loaded. Please run `using GLMakie`.")
