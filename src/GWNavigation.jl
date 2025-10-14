@@ -10,7 +10,11 @@ export GWNavigationPOMDP, GWState, GWObservation, GWAStarPolicy, GWNavigationSim
 
 const GWState = SVector{2, Int}  # (x, y) coordinates   Type alias for state representation
 
+const GWTerminalState = GWState(0, 0)  # Helps to model the transitioning to the terminal state
+
 const GWObservation = SVector{2, Int}  # (x, y) coordinates  Type alias for observation representation
+
+const GWNullObservation = GWObservation(0, 0)  # Represents no observation
 
 struct GWNavigationPOMDP <: POMDP{GWState, Symbol, GWObservation}
     grid_size::Tuple{Int, Int}
@@ -44,12 +48,12 @@ end
 
 # Check if a state is the terminal state
 function POMDPs.isterminal(pomdp::GWNavigationPOMDP, s::GWState)
-    return haskey(pomdp.goal_states, s) || haskey(pomdp.danger_states, s)
+    return s[1] == 0 && s[2] == 0
 end
 
 function POMDPs.states(pomdp::GWNavigationPOMDP)
     # Combine free_states, goal_states, and landmark_states into a single collection
-    return union(keys(pomdp.free_states), keys(pomdp.goal_states), keys(pomdp.landmark_states), keys(pomdp.danger_states))
+    return union(keys(pomdp.free_states), keys(pomdp.goal_states), keys(pomdp.landmark_states), keys(pomdp.danger_states), [GWTerminalState])
 end
 
 function POMDPs.stateindex(pomdp::GWNavigationPOMDP, s::GWState)
@@ -64,6 +68,8 @@ function POMDPs.stateindex(pomdp::GWNavigationPOMDP, s::GWState)
         return pomdp.landmark_states[s]
     elseif haskey(pomdp.danger_states, s)
         return pomdp.danger_states[s]
+    elseif s == GWTerminalState
+        return length(pomdp.free_states) + length(pomdp.goal_states) + length(pomdp.landmark_states) + length(pomdp.danger_states) + 1
     else
         error("State $(s) not found in any state dictionary.")
     end
@@ -88,6 +94,9 @@ end
 function POMDPs.transition(pomdp::GWNavigationPOMDP, s::GWState, a::Symbol)
     if POMDPs.isterminal(pomdp, s)
         return SparseCat([s], [1.0])
+    elseif haskey(pomdp.goal_states, s) || haskey(pomdp.danger_states, s)
+        # Transition to terminal state from goal or danger states
+        return SparseCat([GWTerminalState], [1.0])
     end
 
     intended_state = move(s, a, pomdp.grid_size)
@@ -157,7 +166,7 @@ function POMDPs.observation(pomdp::GWNavigationPOMDP, a::Symbol, sp::GWState)
         return SparseCat(neighbors, fill(prob, num_neighbors))
     else
         # Null observation (no information)
-        return SparseCat([GWState(0,0)], [1.0])
+        return SparseCat([GWNullObservation], [1.0])
     end
 end
 

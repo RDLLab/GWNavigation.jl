@@ -45,7 +45,7 @@ function calculate_a_star_policy(pomdp::GWNavigationPOMDP)
     distances = bfs_from_goal(pomdp)
     policy = Dict{GWState, Symbol}()
 
-    for s in POMDPs.states(pomdp)
+    for s in union(keys(pomdp.free_states), keys(pomdp.goal_states), keys(pomdp.landmark_states), keys(pomdp.danger_states))
         best_action = :Up
         min_dist = Inf
 

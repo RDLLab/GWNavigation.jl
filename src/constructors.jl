@@ -9,46 +9,44 @@ function GWNavigationPOMDP(;grid_size::Int=20)
 end
 
 function GWNavigationPOMDP(
-    grid_size,
-    obstacles,
-    landmarks,
-    danger,
-    goals,
-    initial_states;
-    transition_prob=0.1,
-    discount_factor=0.99,
-    danger_state_penalty=-100.0,
-    goal_state_reward=200.0,
-    step_penalty=-1.0,
-    scaling_factor=1.0
+    grid_size::Tuple{Int, Int},
+    obstacles::Vector{Tuple{Int, Int}},
+    landmarks::Vector{Tuple{Int, Int}},
+    danger::Vector{Tuple{Int, Int}},
+    goals::Vector{Tuple{Int, Int}},
+    initial_states::Vector{Tuple{Int, Int}};
+    transition_prob::Float64=0.1,
+    discount_factor::Float64=0.99,
+    danger_state_penalty::Float64=-100.0,
+    goal_state_reward::Float64=200.0,
+    step_penalty::Float64=-1.0,
+    scaling_factor::Int=1,
 )
-    goal_states = Dict(SVector(s) => 1 for s in goals)
-    obstacle_states = Set(SVector(s) for s in obstacles)
-    landmark_states = Dict(SVector(s) => i for (i, s) in enumerate(landmarks))
-    danger_states = Dict(SVector(s) => 1 for s in danger)
+    goal_states = Set(GWState(s[1], s[2]) for s in goals)
+    obstacle_states = Set(GWState(s[1], s[2]) for s in obstacles)
+    landmark_states = Set(GWState(s[1], s[2]) for s in landmarks)
+    danger_states = Set(GWState(s[1], s[2]) for s in danger)
 
-    if initial_states === nothing
-        initial_states = Set([SVector(1, 1)])
-    else
-        initial_states = Set(SVector(s) for s in initial_states)
-    end
+    initial_states = Set(GWState(s[1], s[2]) for s in initial_states)
 
-    all_states = Set(SVector(x, y) for x in 1:grid_size[1], y in 1:grid_size[2])
-    special_states = union(keys(goal_states), obstacle_states, keys(landmark_states), keys(danger_states))
+    all_states = Set(GWState(x, y) for x in 1:grid_size[1], y in 1:grid_size[2])
+    special_states = union(goal_states, obstacle_states, landmark_states, danger_states)
     free_states_set = setdiff(all_states, special_states)
 
     free_states = Dict(s => i for (i, s) in enumerate(free_states_set))
 
     offset = length(free_states)
-    goal_states = Dict(s => i + offset for (i, s) in enumerate(keys(goal_states)))
-    landmark_states = Dict(s => i + offset + length(goal_states) for (i, s) in enumerate(keys(landmark_states)))
-    danger_states = Dict(s => i + offset + length(goal_states) + length(landmark_states) for (i, s) in enumerate(keys(danger_states)))
+    goal_states = Dict(s => i + offset for (i, s) in enumerate(goal_states))
+    offset += length(goal_states)
+    landmark_states = Dict(s => i + offset for (i, s) in enumerate(landmark_states))
+    offset += length(landmark_states)
+    danger_states = Dict(s => i + offset for (i, s) in enumerate(danger_states))
 
-    observation_dict = Dict(SVector(0, 0) => 1) # Null observation
+    observation_dict::Dict{GWObservation, Int} = Dict(GWNullObservation => 1) # Null observation
     obs_idx = 2
-    for x in 1:grid_size[1]
-        for y in 1:grid_size[2]
-            obs = SVector(x, y)
+    for landmark in keys(landmark_states)
+        for observable_s in get_neighbors(landmark, grid_size)
+            obs = GWObservation(observable_s)
             if !haskey(observation_dict, obs)
                 observation_dict[obs] = obs_idx
                 obs_idx += 1
@@ -92,7 +90,7 @@ function get_20x20_gw_problem()
         danger_20x20,
         goals_20x20,
         init_states_20x20;
-        scaling_factor=1.0
+        scaling_factor=1
     )
 end
 
@@ -135,7 +133,7 @@ function get_60x60_gw_problem()
         danger_60x60,
         goals_60x60,
         init_states_60x60;
-        scaling_factor=3.0
+        scaling_factor=3
     )
 end
 
