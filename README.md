@@ -4,6 +4,14 @@ Implimentation of the Grid World Navigation problem [1] with the [POMDP.jl](http
 
 [1] Kim E, Karunanayake Y, Kurniawati H. Reference-based POMDPs, NeurIPS 23
 
+Grid World 20x20
+
+<img src="img/gw20.png" width="300" height="300" />
+
+Grid World 60x60
+
+<img src="img/gw60.png" width="500" height="500" />
+
 ## Installation
 
 ```julia
