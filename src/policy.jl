@@ -46,10 +46,6 @@ function calculate_a_star_policy(pomdp::GWNavigationPOMDP)
     policy = Dict{GWState, Symbol}()
 
     for s in POMDPs.states(pomdp)
-        if haskey(pomdp.goal_states, s)
-            continue
-        end
-
         best_action = :Up
         min_dist = Inf
 
