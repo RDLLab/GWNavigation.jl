@@ -16,6 +16,8 @@ const GWObservation = SVector{2, Int}  # (x, y) coordinates  Type alias for obse
 
 const GWNullObservation = GWObservation(0, 0)  # Represents no observation
 
+const GWTerminalObservation = GWObservation(-1, -1)  # Represents no observation
+
 struct GWNavigationPOMDP <: POMDP{GWState, Symbol, GWObservation}
     grid_size::Tuple{Int, Int}
     free_states::Dict{GWState, Int} # Mapping states to their indices
@@ -164,6 +166,9 @@ function POMDPs.observation(pomdp::GWNavigationPOMDP, sp::GWState)
         num_neighbors = length(neighbors)
         prob = 1.0 / num_neighbors
         return SparseCat(neighbors, fill(prob, num_neighbors))
+    elseif POMDPs.isterminal(pomdp, sp)
+        # Terminal observation
+        return Deterministic(GWTerminalObservation)
     else
         # Null observation (no information)
         return SparseCat([GWNullObservation], [1.0])

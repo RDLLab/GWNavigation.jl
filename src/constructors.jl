@@ -42,8 +42,8 @@ function GWNavigationPOMDP(
     offset += length(landmark_states)
     danger_states = Dict(s => i + offset for (i, s) in enumerate(danger_states))
 
-    observation_dict::Dict{GWObservation, Int} = Dict(GWNullObservation => 1) # Null observation
-    obs_idx = 2
+    observation_dict::Dict{GWObservation, Int} = Dict(GWNullObservation => 1, GWTerminalObservation => 2) # Null, terminal observations
+    obs_idx = 3
     for landmark in keys(landmark_states)
         for observable_s in get_neighbors(landmark, grid_size)
             obs = GWObservation(observable_s)
