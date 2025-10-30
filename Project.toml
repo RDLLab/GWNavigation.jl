@@ -1,6 +1,6 @@
 name = "GWNavigation"
 uuid = "3f6ca978-1d68-4b56-bb11-f3094904956e"
-authors = ["Yohan <yohanjayasanka0044@gmail.com>"]
+authors = ["Yohan <Yohan.Karunanayake@anu.edu.au>"]
 version = "0.1.0"
 
 [deps]

@@ -158,7 +158,7 @@ function POMDPs.reward(pomdp::GWNavigationPOMDP, s::GWState, a::Symbol)
 end
 
 # Observation model
-function POMDPs.observation(pomdp::GWNavigationPOMDP, a::Symbol, sp::GWState)
+function POMDPs.observation(pomdp::GWNavigationPOMDP, sp::GWState)
     if haskey(pomdp.landmark_states, sp)
         neighbors = get_neighbors(sp, pomdp.grid_size)
         num_neighbors = length(neighbors)
