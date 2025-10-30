@@ -16,7 +16,7 @@ const GWObservation = SVector{2, Int}  # (x, y) coordinates  Type alias for obse
 
 const GWNullObservation = GWObservation(0, 0)  # Represents no observation
 
-const GWTerminalObservation = GWObservation(-1, -1)  # Represents no observation
+const GWTerminalObservation = GWObservation(-1, -1)  # Represents terminal observation
 
 struct GWNavigationPOMDP <: POMDP{GWState, Symbol, GWObservation}
     grid_size::Tuple{Int, Int}
