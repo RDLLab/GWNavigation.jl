@@ -128,7 +128,6 @@ function POMDPs.transition(pomdp::GWNavigationPOMDP, s::GWState, a::Symbol)
     # Remove zero-probability transitions
     state_vec = state_vec[probability_vec .> 0.0]
     probability_vec = probability_vec[probability_vec .> 0.0]
-    # probability_vec ./= sum(probability_vec)  # Normalize
 
     # Transition probabilities
     return SparseCat(state_vec, probability_vec)
