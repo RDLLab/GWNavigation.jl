@@ -24,6 +24,10 @@ function POMDPs.action(p::GWAStarPolicy, b)
         return rand(p.rng, POMDPs.actions(p.pomdp))
     else
         s = rand(p.rng, b)
+        if s[1] == 0 && s[2] == 0
+            # Edge case: if state is (0, 0): Terminal state, choose random action.
+            return rand(p.rng, POMDPs.actions(p.pomdp))
+        end
         return p.actions[s]
     end
 end
@@ -33,6 +37,10 @@ function POMDPs.action(p::GWAStarPolicy, s::GWState)
     if rand(p.rng) < p.uniform_weight
         return rand(p.rng, POMDPs.actions(p.pomdp))
     else
+        if s[1] == 0 && s[2] == 0
+            # Edge case: if state is (0, 0): Terminal state, choose random action.
+            return rand(p.rng, POMDPs.actions(p.pomdp))
+        end
         return p.actions[s]
     end
 end
