@@ -1,6 +1,7 @@
 using GWNavigation
 using Test
 using POMDPs
+using POMDPTools: Deterministic
 using StaticArrays
 
 
@@ -139,22 +140,19 @@ using StaticArrays
         s = SVector(4, 4)
         a = :Up
         dist = transition(pomdp, s, a)
-        @test Set(dist.vals) == Set([SVector(0, 0)])
-        @test dist.probs == [1.0]
+        @test Deterministic(GWNavigation.GWTerminalState) == dist
 
         # Test transition from a danger state (should go to terminal)
         s = SVector(3, 4)
         a = :Left
         dist = transition(pomdp, s, a)
-        @test Set(dist.vals) == Set([SVector(0, 0)])
-        @test dist.probs == [1.0]
+        @test Deterministic(GWNavigation.GWTerminalState) == dist
 
         # Test transition from terminal state (should stay in terminal)
         s = SVector(0, 0)
         a = :Down
         dist = transition(pomdp, s, a)
-        @test Set(dist.vals) == Set([SVector(0, 0)])
-        @test dist.probs == [1.0]
+        @test Deterministic(GWNavigation.GWTerminalState) == dist
     end
 
     @testset "POMDPs.reward" begin
@@ -181,20 +179,17 @@ using StaticArrays
         # Test observation from a non-landmark state
         sp = SVector(3, 2)
         dist = observation(pomdp, :Up, sp)
-        @test dist.vals == [SVector(0,0)]
-        @test dist.probs == [1.0]
+        @test Deterministic(GWNavigation.GWNullObservation) == dist
 
         # Test observation from goal state
         sp = SVector(4, 4)
         dist = observation(pomdp, :Up, sp)
-        @test dist.vals == [SVector(0,0)]
-        @test dist.probs == [1.0]
+        @test Deterministic(GWNavigation.GWNullObservation) == dist
 
         # Test observation from terminal state
         sp = SVector(0, 0)
         dist = observation(pomdp, :Up, sp)
-        @test dist.vals == [SVector(0,0)]
-        @test dist.probs == [1.0]
+        @test Deterministic(GWNavigation.GWNullObservation) == dist
     end
 
     @testset "get_neighbors" begin

@@ -3,10 +3,11 @@ module GWNavigation
 using DataStructures
 using POMDPs
 using POMDPTools
+using ParticleFilters
 using Random
 using StaticArrays
 
-export GWNavigationPOMDP, GWState, GWObservation, GWAStarPolicy, GWNavigationSimulator
+export GWNavigationPOMDP, GWState, GWObservation, GWAStarPolicy, GWNavigationSimulator, GWNavigationParticlePostProcessor
 
 const GWState = SVector{2, Int}  # (x, y) coordinates   Type alias for state representation
 
@@ -93,10 +94,10 @@ end
 # Transition model
 function POMDPs.transition(pomdp::GWNavigationPOMDP, s::GWState, a::Symbol)
     if POMDPs.isterminal(pomdp, s)
-        return SparseCat([s], [1.0])
+        return Deterministic(s)
     elseif haskey(pomdp.goal_states, s) || haskey(pomdp.danger_states, s)
         # Transition to terminal state from goal or danger states
-        return SparseCat([GWTerminalState], [1.0])
+        return Deterministic(GWTerminalState)
     end
 
     intended_state = move(s, a, pomdp.grid_size)
@@ -165,7 +166,7 @@ function POMDPs.observation(pomdp::GWNavigationPOMDP, sp::GWState)
         return SparseCat(neighbors, fill(prob, num_neighbors))
     else
         # Null observation (no information)
-        return SparseCat([GWNullObservation], [1.0])
+        return Deterministic(GWNullObservation)
     end
 end
 
@@ -213,5 +214,6 @@ end
 include("constructors.jl")
 include("policy.jl")
 include("visualization.jl")
+include("particle_filtering.jl")
 
 end # module GWNavigation
