@@ -153,6 +153,11 @@ end
 
 # Define R(s,a)=E[R(s,a,s′)]
 function POMDPs.reward(pomdp::GWNavigationPOMDP, s::GWState, a::Symbol)
+    if POMDPs.isterminal(pomdp, s)
+        return 0.0
+    elseif haskey(pomdp.goal_states, s) || haskey(pomdp.danger_states, s)
+        return 0.0
+    end
     r = 0.0
     for (sp, p) in POMDPs.transition(pomdp, s, a)
         r += p * POMDPs.reward(pomdp, s, a, sp)

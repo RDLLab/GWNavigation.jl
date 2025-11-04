@@ -1,6 +1,7 @@
 using GWNavigation
 using Test
 using POMDPs
+using POMDPTools: Deterministic
 using StaticArrays
 
 
@@ -22,12 +23,14 @@ using StaticArrays
     # Adjust indices for other state types
     offset = length(free_states)
     goal_states = Dict(s => i + offset for (i,s) in enumerate(keys(goal_states)))
-    landmark_states = Dict(s => i + offset + length(goal_states) for (i,s) in enumerate(keys(landmark_states)))
-    danger_states = Dict(s => i + offset + length(goal_states) + length(landmark_states) for (i,s) in enumerate(keys(danger_states)))
-    
+    offset += length(goal_states)
+    landmark_states = Dict(s => i + offset for (i,s) in enumerate(keys(landmark_states)))
+    offset += length(landmark_states)
+    danger_states = Dict(s => i + offset for (i,s) in enumerate(keys(danger_states)))
+
     # Create a comprehensive observation dictionary
-    observation_dict = Dict(SVector(0,0) => 1) # Null observation
-    obs_idx = 2
+    observation_dict = Dict(SVector(0,0) => 1, SVector(-1,-1) => 2) # Null observation
+    obs_idx = 3
     for x in 1:grid_size[1]
         for y in 1:grid_size[2]
             obs = SVector(x,y)
@@ -71,13 +74,14 @@ using StaticArrays
     end
 
     @testset "POMDPs.isterminal" begin
-        @test isterminal(pomdp, SVector(4, 4)) == true 
-        @test isterminal(pomdp, SVector(3, 4)) == true # Danger state is terminal
+        @test isterminal(pomdp, SVector(4, 4)) == false
+        @test isterminal(pomdp, SVector(3, 4)) == false
+        @test isterminal(pomdp, GWNavigation.GWTerminalState) == true
     end
 
     @testset "POMDPs.states" begin
         s = states(pomdp)
-        @test length(s) == grid_size[1] * grid_size[2] - length(obstacle_states)
+        @test length(s) == grid_size[1] * grid_size[2] - length(obstacle_states) + 1 # +1 for terminal state
         @test SVector(1,1) in s
         @test SVector(4,4) in s
         @test SVector(3,4) in s
@@ -93,12 +97,13 @@ using StaticArrays
     end
 
     @testset "POMDPs.observations" begin
-        @test length(observations(pomdp)) == grid_size[1] * grid_size[2] + 1
+        @test length(observations(pomdp)) == grid_size[1] * grid_size[2] + 2 # +2 for null and terminal observations
     end
 
     @testset "POMDPs.obsindex" begin
-        @test obsindex(pomdp, SVector(0,0)) == 1
-        @test obsindex(pomdp, SVector(1,1)) == 2
+        @test obsindex(pomdp, GWNavigation.GWNullObservation) == 1
+        @test obsindex(pomdp, GWNavigation.GWTerminalObservation) == 2
+        @test obsindex(pomdp, SVector(1,1)) == 3
     end
 
     @testset "move" begin
@@ -130,11 +135,28 @@ using StaticArrays
         dist = transition(pomdp, s, a)
         @test Set(dist.vals) == Set([SVector(1, 3), SVector(1, 1), SVector(1, 2)])
         @test dist.probs == [0.05, 0.05, 0.9]
+
+        # Test transition from a goal state (should go to terminal)
+        s = SVector(4, 4)
+        a = :Up
+        dist = transition(pomdp, s, a)
+        @test Deterministic(GWNavigation.GWTerminalState) == dist
+
+        # Test transition from a danger state (should go to terminal)
+        s = SVector(3, 4)
+        a = :Left
+        dist = transition(pomdp, s, a)
+        @test Deterministic(GWNavigation.GWTerminalState) == dist
+
+        # Test transition from terminal state (should stay in terminal)
+        s = SVector(0, 0)
+        a = :Down
+        dist = transition(pomdp, s, a)
+        @test Deterministic(GWNavigation.GWTerminalState) == dist
     end
 
     @testset "POMDPs.reward" begin
         # Test R(s,a,s')
-        @test reward(pomdp, SVector(3, 4), :Right, SVector(4, 4)) == 0.0
         @test reward(pomdp, SVector(4, 3), :Up, SVector(4, 4)) == 200.0
         @test reward(pomdp, SVector(3, 3), :UP, SVector(3, 4)) == -100.0
         @test reward(pomdp, SVector(4, 2), :UP, SVector(4, 3)) == -1.0
@@ -145,6 +167,9 @@ using StaticArrays
         @test reward(pomdp, SVector(3, 3), :Left) == -5.95
         @test reward(pomdp, SVector(3, 3), :Down) == -1.0
         @test reward(pomdp, SVector(4, 3), :Up) == 179.89999999999998
+        @test reward(pomdp, SVector(3, 4), :Right) == 0.0
+        @test reward(pomdp, SVector(4, 4), :Right) == 0.0
+        @test reward(pomdp, GWNavigation.GWTerminalState, :Up) == 0.0
     end
 
     @testset "POMDPs.observation" begin
@@ -157,8 +182,22 @@ using StaticArrays
         # Test observation from a non-landmark state
         sp = SVector(3, 2)
         dist = observation(pomdp, :Up, sp)
-        @test dist.vals == [SVector(0,0)]
-        @test dist.probs == [1.0]
+        @test Deterministic(GWNavigation.GWNullObservation) == dist
+
+        # Test observation from goal state
+        sp = SVector(4, 4)
+        dist = observation(pomdp, :Up, sp)
+        @test Deterministic(GWNavigation.GWNullObservation) == dist
+
+        # Test observation from danger state
+        sp = SVector(3, 4)
+        dist = observation(pomdp, :Up, sp)
+        @test Deterministic(GWNavigation.GWNullObservation) == dist
+
+        # Test observation from terminal state
+        sp = GWNavigation.GWTerminalState
+        dist = observation(pomdp, :Up, sp)
+        @test Deterministic(GWNavigation.GWTerminalObservation) == dist
     end
 
     @testset "get_neighbors" begin
