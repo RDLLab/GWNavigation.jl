@@ -28,6 +28,7 @@ struct GWNavigationPOMDP <: POMDP{GWState, Symbol, GWObservation}
     danger_states::Dict{GWState, Int}
     initial_states::Set{GWState}
     observation_dict::Dict{GWObservation, Int} # Mapping observations to their indices
+    observations_to_states::Dict{GWObservation, Set{GWState}} # Mapping observations to possible states for handling particle depletion
     transition_prob::Float64        # Transition probability for orthogonal direction.
     # observation_prob::Float64
     discount_factor::Float64        # 0.99

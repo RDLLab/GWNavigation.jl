@@ -1,6 +1,6 @@
 # GWNavigation.jl
 
-Implimentation of the Grid World Navigation problem [1] with the [POMDP.jl](https://github.com/JuliaPOMDP/POMDPs.jl) interface.
+Implimentation of the Grid World Navigation problem [1] with the [POMDPs.jl](https://github.com/JuliaPOMDP/POMDPs.jl) interface.
 
 [1] Kim E, Karunanayake Y, Kurniawati H. Reference-based POMDPs, NeurIPS 23
 
@@ -35,7 +35,7 @@ pomdp = GWNavigationPOMDP(grid_size=20)
 # Greedy A* distance based policy implimentation
 policy = GWAStarPolicy(pomdp; uniform_weight=0.1)
 
-updater = BootstrapFilter(pomdp, 1000)
+updater = BootstrapFilter(pomdp, 1000, postprocess=GWNavigationParticlePostProcessor(pomdp))
 simulator = GWNavigationSimulator(max_steps=30)
 
 POMDPs.simulate(simulator, pomdp, policy, updater)
