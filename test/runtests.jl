@@ -30,13 +30,19 @@ using StaticArrays
 
     # Create a comprehensive observation dictionary
     observation_dict = Dict(SVector(0,0) => 1) # Null observation
+    observations_to_states = Dict{GWObservation, Set{GWState}}()
     obs_idx = 2
-    for x in 1:grid_size[1]
-        for y in 1:grid_size[2]
-            obs = SVector(x,y)
+    for landmark in keys(landmark_states)
+        for observable_s in GWNavigation.get_neighbors(landmark, grid_size)
+            obs = GWObservation(observable_s)
             if !haskey(observation_dict, obs)
                 observation_dict[obs] = obs_idx
                 obs_idx += 1
+            end
+            if haskey(observations_to_states, obs)
+                push!(observations_to_states[obs], landmark)
+            else
+                observations_to_states[obs] = Set{GWState}([landmark])
             end
         end
     end
@@ -50,6 +56,7 @@ using StaticArrays
         danger_states,
         Set(initial_states_vec),
         observation_dict,
+        observations_to_states,
         0.1,
         0.99,
         -100.0,
@@ -98,7 +105,7 @@ using StaticArrays
     end
 
     @testset "POMDPs.observations" begin
-        @test length(observations(pomdp)) == grid_size[1] * grid_size[2] + 1
+        @test length(observations(pomdp)) == 9
     end
 
     @testset "POMDPs.obsindex" begin

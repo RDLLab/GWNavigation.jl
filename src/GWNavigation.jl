@@ -26,6 +26,7 @@ struct GWNavigationPOMDP <: POMDP{GWState, Symbol, GWObservation}
     danger_states::Dict{GWState, Int}
     initial_states::Set{GWState}
     observation_dict::Dict{GWObservation, Int} # Mapping observations to their indices
+    observations_to_states::Dict{GWObservation, Set{GWState}} # Mapping observations to possible states for handling particle depletion
     transition_prob::Float64        # Transition probability for orthogonal direction.
     # observation_prob::Float64
     discount_factor::Float64        # 0.99
@@ -150,6 +151,11 @@ end
 
 # Define R(s,a)=E[R(s,a,s′)]
 function POMDPs.reward(pomdp::GWNavigationPOMDP, s::GWState, a::Symbol)
+    if POMDPs.isterminal(pomdp, s)
+        return 0.0
+    elseif haskey(pomdp.goal_states, s) || haskey(pomdp.danger_states, s)
+        return 0.0
+    end
     r = 0.0
     for (sp, p) in POMDPs.transition(pomdp, s, a)
         r += p * POMDPs.reward(pomdp, s, a, sp)
