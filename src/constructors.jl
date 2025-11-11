@@ -33,19 +33,28 @@ function GWNavigationPOMDP(
     special_states = union(goal_states, obstacle_states, landmark_states, danger_states)
     free_states_set = setdiff(all_states, special_states)
 
-    free_states = Dict(s => i for (i, s) in enumerate(free_states_set))
+    free_states_dict = Dict(s => i for (i, s) in enumerate(free_states_set))
 
-    offset = length(free_states)
-    goal_states = Dict(s => i + offset for (i, s) in enumerate(goal_states))
-    offset += length(goal_states)
-    landmark_states = Dict(s => i + offset for (i, s) in enumerate(landmark_states))
-    offset += length(landmark_states)
-    danger_states = Dict(s => i + offset for (i, s) in enumerate(danger_states))
+    offset = length(free_states_dict)
+    goal_states_dict = Dict(s => i + offset for (i, s) in enumerate(goal_states))
+    offset += length(goal_states_dict)
+    landmark_states_dict:: Dict{GWState, Int} = Dict()   # To handle overlapping goal and landmark states
+    offset_ajustment = 0
+    for (i, s) in enumerate(landmark_states)
+        if haskey(goal_states_dict, s)
+            offset_ajustment += 1
+            landmark_states_dict[s] = goal_states_dict[s]  # Assign the same index as the goal state
+        else
+            landmark_states_dict[s] = i + offset_ajustment
+        end
+    end
+    offset = length(union(keys(goal_states_dict), keys(landmark_states_dict))) + length(free_states_dict)
+    danger_states_dict = Dict(s => i + offset for (i, s) in enumerate(danger_states))
 
     observation_dict::Dict{GWObservation, Int} = Dict(GWNullObservation => 1) # Null observation
     observations_to_states = Dict{GWObservation, Set{GWState}}()
     obs_idx = 2
-    for landmark in keys(landmark_states)
+    for landmark in keys(landmark_states_dict)
         for observable_s in get_neighbors(landmark, grid_size)
             obs = GWObservation(observable_s)
             if !haskey(observation_dict, obs)
@@ -62,11 +71,11 @@ function GWNavigationPOMDP(
 
     return GWNavigationPOMDP(
         grid_size,
-        free_states,
-        goal_states,
+        free_states_dict,
+        goal_states_dict,
         obstacle_states,
-        landmark_states,
-        danger_states,
+        landmark_states_dict,
+        danger_states_dict,
         initial_states,
         observation_dict,
         observations_to_states,
