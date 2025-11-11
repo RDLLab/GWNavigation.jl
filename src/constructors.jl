@@ -33,28 +33,28 @@ function GWNavigationPOMDP(
     special_states = union(goal_states, obstacle_states, landmark_states, danger_states)
     free_states_set = setdiff(all_states, special_states)
 
-    free_states_dict = Dict(s => i for (i, s) in enumerate(free_states_set))
+    free_states_dict = Dict(s => i for (i, s) in enumerate(sort(collect(free_states_set))))
 
     offset = length(free_states_dict)
-    goal_states_dict = Dict(s => i + offset for (i, s) in enumerate(goal_states))
+    goal_states_dict = Dict(s => i + offset for (i, s) in enumerate(sort(collect(goal_states))))
     offset += length(goal_states_dict)
     landmark_states_dict:: Dict{GWState, Int} = Dict()   # To handle overlapping goal and landmark states
     offset_ajustment = 0
-    for (i, s) in enumerate(landmark_states)
+    for (i, s) in enumerate(sort(collect(landmark_states)))
         if haskey(goal_states_dict, s)
-            offset_ajustment += 1
+            offset_ajustment -= 1
             landmark_states_dict[s] = goal_states_dict[s]  # Assign the same index as the goal state
         else
-            landmark_states_dict[s] = i + offset_ajustment
+            landmark_states_dict[s] = i + offset + offset_ajustment
         end
     end
     offset = length(union(keys(goal_states_dict), keys(landmark_states_dict))) + length(free_states_dict)
-    danger_states_dict = Dict(s => i + offset for (i, s) in enumerate(danger_states))
+    danger_states_dict = Dict(s => i + offset for (i, s) in enumerate(sort(collect(danger_states))))
 
     observation_dict::Dict{GWObservation, Int} = Dict(GWNullObservation => 1) # Null observation
     observations_to_states = Dict{GWObservation, Set{GWState}}()
     obs_idx = 2
-    for landmark in keys(landmark_states_dict)
+    for landmark in sort(collect(landmark_states))
         for observable_s in get_neighbors(landmark, grid_size)
             obs = GWObservation(observable_s)
             if !haskey(observation_dict, obs)
