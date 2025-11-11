@@ -98,6 +98,7 @@ using StaticArrays
     @testset "POMDPs.stateindex" begin
         @test 1 <= stateindex(pomdp, SVector(1, 2)) <= length(states(pomdp))
         @test stateindex(pomdp, SVector(4, 4)) == 11    # Goal state should have the 11th index
+        @test stateindex(pomdp, GWNavigation.GWTerminalState) == 15    # Terminal state should have the last index
     end
 
     @testset "POMDPs.initialstate" begin
