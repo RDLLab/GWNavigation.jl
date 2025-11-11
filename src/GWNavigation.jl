@@ -69,7 +69,7 @@ function POMDPs.stateindex(pomdp::GWNavigationPOMDP, s::GWState)
     elseif haskey(pomdp.danger_states, s)
         return pomdp.danger_states[s]
     elseif s == GWTerminalState
-        return length(pomdp.free_states) + length(pomdp.goal_states) + length(pomdp.landmark_states) + length(pomdp.danger_states) + 1
+        return length(pomdp.free_states) + length(union(keys(pomdp.goal_states), keys(pomdp.landmark_states))) + length(pomdp.danger_states) + 1
     else
         error("State $(s) not found in any state dictionary.")
     end
