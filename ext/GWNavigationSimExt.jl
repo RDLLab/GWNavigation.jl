@@ -123,6 +123,22 @@ function GWNavigation.plot_astar_policy(pomdp::GWNavigationPOMDP, policy::GWASta
     readline()
 end
 
+function GWNavigation.plot_state_indexs(pomdp::GWNavigationPOMDP)
+    fig, ax = draw_the_gridworld(pomdp)
+
+    for s in POMDPs.states(pomdp)
+        idx = POMDPs.stateindex(pomdp, s)
+        if haskey(pomdp.free_states, s) || haskey(pomdp.danger_states, s)
+            color="#000000"
+        else
+            color="#FFFFFF"
+        end
+        text!(ax, string(idx), position=(s[1], s[2]), color=color, align = (:center, :center))
+    end
+    display(fig)
+    print("Press Enter to exit...")
+    readline()
+end
 
 # Visualization function
 function draw_the_gridworld(pomdp::GWNavigationPOMDP)

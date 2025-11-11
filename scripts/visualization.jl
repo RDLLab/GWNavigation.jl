@@ -11,6 +11,9 @@ policy = GWAStarPolicy(pomdp; uniform_weight=0.1)
 # #Visualize A* policy
 # GWNavigation.plot_astar_policy(pomdp, policy)
 
+# Visualize state indices
+# GWNavigation.plot_state_indexs(pomdp)
+
 updater = BootstrapFilter(pomdp, 1000, postprocess=GWNavigationParticlePostProcessor(pomdp))
 simulator = GWNavigationSimulator(max_steps=60)
 # simulator = HistoryRecorder(max_steps=60)
