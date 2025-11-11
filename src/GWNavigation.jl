@@ -61,8 +61,6 @@ function POMDPs.states(pomdp::GWNavigationPOMDP)
 end
 
 function POMDPs.stateindex(pomdp::GWNavigationPOMDP, s::GWState)
-    @assert 1 <= s[1] <= pomdp.grid_size[1] "Invalid state"
-    @assert 1 <= s[2] <= pomdp.grid_size[2] "Invalid state"
     # Try to get the state index from any of the dictionaries
     if haskey(pomdp.free_states, s)
         return pomdp.free_states[s]
