@@ -15,12 +15,12 @@ function (ppp::GWNavigationParticlePostProcessor)(bp, a, o, b, bb, rng)
 
     for i in 1:n
         if weight(bp, i) == 0.0
-            postprocess_i += 1
-            if postprocess_i % 1_000_000 == 0
-                @warn "Stuck in GWNavigationParticlePostProcessor while loop for $postprocess_i iterations."                    
-            end
             if o == GWNullObservation
                 while true
+                    postprocess_i += 1
+                    if postprocess_i % 1_000_000 == 0
+                        @warn "Stuck in GWNavigationParticlePostProcessor while loop for $postprocess_i iterations."                    
+                    end
                     # Sample a particle from previous preprocessed belief
                     s = rand(rng, bb)
                     sp, o_sampled = @gen(:sp, :o)(ppp.pomdp, s, a, rng)
