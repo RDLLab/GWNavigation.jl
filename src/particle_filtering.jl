@@ -16,7 +16,7 @@ function (ppp::GWNavigationParticlePostProcessor)(bp, a, o, b, bb, rng)
             bp = WeightedParticleBelief(union(keys(ppp.pomdp.free_states), keys(ppp.pomdp.danger_states)))
         else
             # Create new belief with matching states for observation
-            bp = WeightedParticleBelief(ppp.pomdp.observations_to_states[o])
+            bp = WeightedParticleBelief(collect(ppp.pomdp.observations_to_states[o]))
         end
     else
         # Remove zero-weight particles
