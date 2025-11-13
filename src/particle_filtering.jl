@@ -9,12 +9,12 @@ end
 
 function (ppp::GWNavigationParticlePostProcessor)(bp, a, o, b, bb, rng)
     n = n_particles(bp)
-    weight_sum = weight_sum(bp)
-    if weight_sum == 0.0
+    particle_weight_sum = weight_sum(bp)
+    if particle_weight_sum == 0.0
         error("All particles have zero weight after observation update. Cannot postprocess belief. a: $a, o: $o")
     else
         # Remove zero-weight particles
-        new_weight = weight_sum/n
+        new_weight = particle_weight_sum/n
         postprocess_i = 0
 
         for i in 1:n
