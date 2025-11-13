@@ -11,7 +11,13 @@ function (ppp::GWNavigationParticlePostProcessor)(bp, a, o, b, bb, rng)
     n = n_particles(bp)
     particle_weight_sum = weight_sum(bp)
     if particle_weight_sum == 0.0
-        error("All particles have zero weight after observation update. Cannot postprocess belief. a: $a, o: $o")
+        if o == GWNullObservation
+            # Create new belief with all possible states
+            bp = WeightedParticleBelief(union(keys(ppp.pomdp.free_states), keys(ppp.pomdp.danger_states)))
+        else
+            # Create new belief with matching states for observation
+            bp = WeightedParticleBelief(ppp.pomdp.observations_to_states[o])
+        end
     else
         # Remove zero-weight particles
         new_weight = particle_weight_sum/n
