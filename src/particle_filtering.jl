@@ -9,31 +9,42 @@ end
 
 function (ppp::GWNavigationParticlePostProcessor)(bp, a, o, b, bb, rng)
     n = n_particles(bp)
-    # Remove zero-weight particles
-    new_weight = weight_sum(bp)/n
-    postprocess_i = 0
+    particle_weight_sum = weight_sum(bp)
+    if particle_weight_sum == 0.0
+        if o == GWNullObservation
+            # Create new belief with all possible states
+            bp = WeightedParticleBelief(union(keys(ppp.pomdp.free_states), keys(ppp.pomdp.danger_states)))
+        else
+            # Create new belief with matching states for observation
+            bp = WeightedParticleBelief(ppp.pomdp.observations_to_states[o])
+        end
+    else
+        # Remove zero-weight particles
+        new_weight = particle_weight_sum/n
+        postprocess_i = 0
 
-    for i in 1:n
-        if weight(bp, i) == 0.0
-            if o == GWNullObservation
-                while true
-                    postprocess_i += 1
-                    if postprocess_i % 1_000_000 == 0
-                        @warn "Stuck in GWNavigationParticlePostProcessor while loop for $postprocess_i iterations."                    
+        for i in 1:n
+            if weight(bp, i) == 0.0
+                if o == GWNullObservation
+                    while true
+                        postprocess_i += 1
+                        if postprocess_i % 1_000_000 == 0
+                            @warn "Stuck in GWNavigationParticlePostProcessor while loop for $postprocess_i iterations."                    
+                        end
+                        # Sample a particle from previous preprocessed belief
+                        s = rand(rng, bb)
+                        sp, o_sampled = @gen(:sp, :o)(ppp.pomdp, s, a, rng)
+                        # Check if sampled observation matches actual observation o, if so, set the new particle
+                        if o_sampled == GWNullObservation
+                            set_pair!(bp, i, sp => new_weight)
+                            break
+                        end
                     end
-                    # Sample a particle from previous preprocessed belief
-                    s = rand(rng, bb)
-                    sp, o_sampled = @gen(:sp, :o)(ppp.pomdp, s, a, rng)
-                    # Check if sampled observation matches actual observation o, if so, set the new particle
-                    if o_sampled == GWNullObservation
-                        set_pair!(bp, i, sp => new_weight)
-                        break
-                    end
+                else
+                    # Sample a state from possible states for the observation
+                    sp = rand(rng, ppp.pomdp.observations_to_states[o])
+                    set_pair!(bp, i, sp => new_weight)
                 end
-            else
-                # Sample a state from possible states for the observation
-                sp = rand(rng, ppp.pomdp.observations_to_states[o])
-                set_pair!(bp, i, sp => new_weight)
             end
         end
     end
