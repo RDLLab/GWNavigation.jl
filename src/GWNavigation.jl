@@ -136,31 +136,30 @@ function POMDPs.transition(pomdp::GWNavigationPOMDP, s::GWState, a::Symbol)
 end
 
 
-# Define the reward function given the state, action, and next state
-function POMDPs.reward(pomdp::GWNavigationPOMDP, s::GWState, a::Symbol, s_next::GWState)
-    if POMDPs.isterminal(pomdp, s)
-        return 0.0
-    elseif haskey(pomdp.goal_states, s_next)
-        return pomdp.goal_state_reward * pomdp.scale_factor
-    elseif haskey(pomdp.danger_states, s_next)
-        return pomdp.danger_state_penalty * pomdp.scale_factor
-    else
-        return pomdp.step_penalty
-    end
-end
+# # Define the reward function given the state, action, and next state
+# function POMDPs.reward(pomdp::GWNavigationPOMDP, s::GWState, a::Symbol, s_next::GWState)
+#     if POMDPs.isterminal(pomdp, s)
+#         return 0.0
+#     elseif haskey(pomdp.goal_states, s_next)
+#         return pomdp.goal_state_reward * pomdp.scale_factor
+#     elseif haskey(pomdp.danger_states, s_next)
+#         return pomdp.danger_state_penalty * pomdp.scale_factor
+#     else
+#         return pomdp.step_penalty
+#     end
+# end
 
-# Define R(s,a)=E[R(s,a,s′)]
+# Define the reward function given the state and action R(s,a)
 function POMDPs.reward(pomdp::GWNavigationPOMDP, s::GWState, a::Symbol)
     if POMDPs.isterminal(pomdp, s)
         return 0.0
-    elseif haskey(pomdp.goal_states, s) || haskey(pomdp.danger_states, s)
-        return 0.0
+    elseif haskey(pomdp.goal_states, s)
+        return pomdp.goal_state_reward * pomdp.scale_factor
+    elseif haskey(pomdp.danger_states, s)
+        return pomdp.danger_state_penalty * pomdp.scale_factor
+    else
+        return pomdp.step_penalty * pomdp.scale_factor
     end
-    r = 0.0
-    for (sp, p) in POMDPs.transition(pomdp, s, a)
-        r += p * POMDPs.reward(pomdp, s, a, sp)
-    end
-    return r
 end
 
 # Observation model

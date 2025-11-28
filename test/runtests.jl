@@ -166,20 +166,16 @@ using StaticArrays
     end
 
     @testset "POMDPs.reward" begin
-        # Test R(s,a,s')
-        @test reward(pomdp, SVector(4, 3), :Up, SVector(4, 4)) == 200.0
-        @test reward(pomdp, SVector(3, 3), :UP, SVector(3, 4)) == -100.0
-        @test reward(pomdp, SVector(4, 2), :UP, SVector(4, 3)) == -1.0
-
         # Test R(s,a)
-        @test reward(pomdp, SVector(3, 3), :Right) == -5.95
-        @test reward(pomdp, SVector(3, 3), :Up) == -90.1
-        @test reward(pomdp, SVector(3, 3), :Left) == -5.95
+        @test reward(pomdp, SVector(3, 4), :Right) == -100.0
+        @test reward(pomdp, SVector(3, 4), :Up) == -100.0
+        @test reward(pomdp, SVector(3, 3), :Up) == -1.0
+        @test reward(pomdp, SVector(3, 3), :Left) == -1.0
         @test reward(pomdp, SVector(3, 3), :Down) == -1.0
-        @test reward(pomdp, SVector(4, 3), :Up) == 179.89999999999998
-        @test reward(pomdp, SVector(3, 4), :Right) == 0.0
-        @test reward(pomdp, SVector(4, 4), :Right) == 0.0
+        @test reward(pomdp, SVector(4, 4), :Up) == 200.0
+        @test reward(pomdp, SVector(4, 4), :Right) == 200.0
         @test reward(pomdp, GWNavigation.GWTerminalState, :Up) == 0.0
+        @test reward(pomdp, GWNavigation.GWTerminalState, :Right) == 0.0
     end
 
     @testset "POMDPs.observation" begin
