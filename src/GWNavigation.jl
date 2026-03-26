@@ -7,7 +7,7 @@ using ParticleFilters
 using Random
 using StaticArrays
 
-export GWNavigationPOMDP, GWState, GWObservation, GWAStarPolicy, GWNavigationSimulator, GWNavigationParticlePostProcessor
+export GWNavigationPOMDP, GWState, GWObservation, GWAStarPolicy, GWLocalizeOrAStarPolicy, GWNavigationSimulator, GWNavigationParticlePostProcessor
 
 const GWState = SVector{2, Int}  # (x, y) coordinates   Type alias for state representation
 
