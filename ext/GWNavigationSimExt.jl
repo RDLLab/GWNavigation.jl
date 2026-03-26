@@ -81,7 +81,7 @@ function POMDPs.simulate(sim::GWNavigationSimulator, pomdp::GWNavigationPOMDP, a
 end
 
 
-function GWNavigation.plot_astar_policy(pomdp::GWNavigationPOMDP, policy::GWAStarPolicy)
+function GWNavigation.plot_policy_dic(pomdp::GWNavigationPOMDP, actions_dict::Dict{GWState, Symbol})
     fig, ax = draw_the_gridworld(pomdp)
     grid_size = pomdp.grid_size
 
@@ -94,8 +94,8 @@ function GWNavigation.plot_astar_policy(pomdp::GWNavigationPOMDP, policy::GWASta
             if (state in pomdp.obstacle_states)
                 continue
             end
-            if haskey(policy.actions, state)
-                action = policy.actions[state]
+            if haskey(actions_dict, state)
+                action = actions_dict[state]
                 origin = Point2f(x, y)
                 direction = Vec2f(0, 0)
                 if action == :Up

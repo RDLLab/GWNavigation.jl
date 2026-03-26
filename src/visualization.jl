@@ -17,8 +17,8 @@ function POMDPs.simulate(sim::GWNavigationSimulator, pomdp, args...)
 end
 
 # Stub function definition
-function plot_astar_policy(pomdp::POMDP, policy::GWAStarPolicy)
-    error("To use `plot_astar_policy`, you must have GLMakie loaded. Please run `using GLMakie`.")
+function plot_policy_dic(pomdp::POMDP, policy::Dict{GWState, Symbol})
+    error("To use `plot_policy_dic`, you must have GLMakie loaded. Please run `using GLMakie`.")
 end
 
 function plot_state_indexs(pomdp::POMDP)

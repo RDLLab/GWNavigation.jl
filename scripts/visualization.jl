@@ -5,11 +5,13 @@ using POMDPTools
 using GLMakie
 
 # Example usage
-pomdp = GWNavigationPOMDP(grid_size=20) # Default 20x20 GridWorld
-policy = GWAStarPolicy(pomdp; uniform_weight=0.1)
+pomdp = GWNavigationPOMDP(grid_size=20, danger_state_penalty=-600.0, discount_factor=0.98) # Default 20x20 GridWorld
+# policy = GWAStarPolicy(pomdp; uniform_weight=0.1)
+policy = GWLocalizeOrAStarPolicy(pomdp; entropy_threshold=3.5)
 
 # #Visualize A* policy
-# GWNavigation.plot_astar_policy(pomdp, policy)
+# GWNavigation.plot_policy_dic(pomdp, policy.actions)
+# GWNavigation.plot_policy_dic(pomdp, policy.localize_actions) # policy.astar_actions, policy.localize_actions
 
 # Visualize state indices
 # GWNavigation.plot_state_indexs(pomdp)
